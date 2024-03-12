@@ -1,0 +1,76 @@
+
+/**
+ * Program purpose: To calculate anual salary for each employee
+ * Programmer: Iqbal
+ * Date:12 March 2024
+ * 
+ */
+
+ import java.io.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+class Employee {
+    String name;
+    double baseSalary;
+    int yearsOfService;
+
+    public Employee(String name, double baseSalary, int yearsOfService) {
+        this.name = name;
+        this.baseSalary = baseSalary;
+        this.yearsOfService = yearsOfService;
+    }
+
+    public double calculateAnnualSalary() {
+        return baseSalary + (baseSalary * 0.05 * yearsOfService);
+    }
+}
+
+public class EmployeeSalaryProgram {
+    public static void main(String[] args) {
+        List<Employee> employees = new ArrayList<>();
+        String inputFile = "employeeSalaries.txt";
+        String outputFile = "employeeData.txt";
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+             PrintWriter writer = new PrintWriter(new FileWriter(outputFile))) {
+            
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                String name = parts[0];
+                double baseSalary = Double.parseDouble(parts[1]);
+                int yearsOfService = Integer.parseInt(parts[2]);
+                employees.add(new Employee(name, baseSalary, yearsOfService));
+            }
+
+            Employee topPerformer = employees.stream().max(Comparator.comparing(Employee::calculateAnnualSalary)).orElse(null);
+            Employee leastExperienced = employees.stream().min(Comparator.comparingInt(e -> e.yearsOfService)).orElse(null);
+
+            for (Employee employee : employees) {
+                double annualSalary = employee.calculateAnnualSalary();
+                writer.println(employee.name + " : Annual Salary = " + annualSalary + ", Years of Service = " + employee.yearsOfService);
+            }
+
+            if (topPerformer != null) {
+                System.out.println("Top Performer: " + topPerformer.name);
+                writer.println("Top Performer: " + topPerformer.name);
+            }
+
+            if (leastExperienced != null) {
+                System.out.println("Least Years of Service: " + leastExperienced.name);
+                writer.println("Least Years of Service: " + leastExperienced.name);
+            }
+
+        } catch (FileNotFoundException e) {
+            System.err.println("Input file not found.");
+        } catch (IOException e) {
+            System.err.println("An error occurred while reading from the file or writing to the file.");
+        } catch (NumberFormatException e) {
+            System.err.println("Error in parsing numerical data.");
+        } catch (Exception e) {
+            System.err.println("An unexpected error occurred: " + e.getMessage());
+        }
+    }
+}
